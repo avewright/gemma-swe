@@ -1,0 +1,14 @@
+.env
+
+# Contest data is large and local-only.
+data/*.zip
+data/*.kaggle-partial
+data/snapshots/
+data/wheels/
+data/embeddings/
+data/graphs/
+data/docker/
+data/sandbox/
+
+# Built submission archive.
+submission.zip

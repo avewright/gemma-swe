@@ -1,0 +1,7 @@
+# Per-task caps. The whole submission gets 12 hours, including sandbox setup.
+# 120 tasks at 5 minutes leaves about 2 hours for setup.
+evaluation:
+  timeout_seconds: 120
+  max_tool_calls: 40
+  max_time_minutes: 5
+  max_turns: 40
