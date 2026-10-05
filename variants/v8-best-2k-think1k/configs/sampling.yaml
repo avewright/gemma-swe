@@ -1,0 +1,9 @@
+# v8-best-2k-think1k (E15): v8-best-2k with thinking on, capped at 1024 tokens per turn. Since the 2026-09-30
+# wheelhouse, thinking_budget is sent to vLLM as thinking_token_budget and thoughts survive between tool calls.
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 2048
+thinking_config:
+  include_thoughts: true
+  thinking_budget: 1024

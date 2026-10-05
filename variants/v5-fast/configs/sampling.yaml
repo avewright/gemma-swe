@@ -1,0 +1,9 @@
+temperature: 0.2
+top_p: 0.95
+max_output_tokens: 16384
+# v5: short thinking. At high/4096 a turn can take a minute or more on 4x L4, which leaves
+# only a few turns in the 5-minute budget (v4-compact scored 0.06).
+thinking_config:
+  thinking_level: low
+  thinking_budget: 512
+  include_thoughts: true

@@ -1,0 +1,8 @@
+# Per-task caps (optional; the contest only fixes 12 hours for all ~120 tasks, setup included).
+# If tasks run one at a time, 12 h / 120 tasks is about 6 min each including setup, so time is the
+# binding budget. Tool calls and turns are set high so they rarely cut off a productive run.
+evaluation:
+  timeout_seconds: 120
+  max_tool_calls: 80
+  max_time_minutes: 5
+  max_turns: 80

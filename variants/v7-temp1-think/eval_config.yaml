@@ -1,0 +1,7 @@
+# v7: a cap for runaway tasks only, not a pace. The 0.12 public notebook ships no limits at all;
+# 12 minutes and 100 calls leave normal tasks alone but stop one stuck task from eating hours of
+# the 12-hour total (an overrun currently errors the whole submission).
+evaluation:
+  timeout_seconds: 300
+  max_tool_calls: 100
+  max_time_minutes: 12

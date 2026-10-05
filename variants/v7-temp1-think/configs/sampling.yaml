@@ -1,0 +1,8 @@
+# v7-temp1-think: v7-temp1 with thinking on. The bridge only sends enable_thinking, so there's no thinking
+# length limit; max_output_tokens caps a turn (thinking + reply + tool call).
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 8192
+thinking_config:
+  include_thoughts: true

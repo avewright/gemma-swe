@@ -1,0 +1,9 @@
+openai>=1.40
+pyyaml
+numpy
+pyarrow>=15
+transformers>=5.0
+peft>=0.13
+accelerate
+bitsandbytes
+torch

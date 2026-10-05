@@ -1,0 +1,22 @@
+variant            runs  solved/graded  calls  b2b rep  any rep  reads  edits edit fail garbled empty sub 1st edit   secs tok/turn timeouts overflow
+sweep-split          12           2/12     92      41%      52%      7      0        36   11.0%         3       35    387       84        1        2
+sweep-t02            12           2/12     40      21%      32%      7      0        12    0.0%         2       17    257       95        2        3
+sweep-t02-fp03       12           3/12     58      35%      46%      6      1         2   24.3%         2       25    279       87        1        4
+sweep-t05            12           2/12     76      29%      45%      9      4        87   11.2%         1       30    320       87        1        5
+sweep-t07            12           1/12     37      23%      34%      8      1        78    8.3%         1       21    240      100        2        4
+sweep-t10            12           3/12     46      14%      24%     12      2        79    0.8%         0       34    324       94        0        4
+
+task                  sweep-split           sweep-t02      sweep-t02-fp03           sweep-t05           sweep-t07           sweep-t10
+rich_3052           fail 93c 721s       fail 38c 376s      fail 117c 689s       fail 91c 372s       fail 95c 557s       fail 96c 553s
+rich_3063          fail 100c 576s       fail 22c 291s       fail 62c 651s       fail 71c 584s      fail 101c 339s       fail 97c 639s
+rich_3105           fail 92c 220s       fail 96c 283s       fail 97c 268s       fail 96c 185s        fail 22c 91s       fail 36c 546s
+rich_3472           fail 36c 505s       fail 98c 240s      fail 159c 419s      fail 101c 391s       fail 34c 187s       fail 47c 398s
+rich_3506           fail 93c 405s       fail 43c 599s       fail 24c 149s      fail 115c 717s       fail 30c 717s       PASS 44c 401s
+rich_3676           fail 24c 114s       fail 27c 253s       PASS 33c 236s       fail 27c 162s       fail 30c 149s       fail 35c 208s
+rich_3777           PASS 46c 188s       PASS 27c 135s       PASS 33c 148s       PASS 45c 269s       fail 40c 239s       PASS 53c 195s
+rich_3905           PASS 24c 161s        PASS 20c 88s       PASS 24c 100s       PASS 28c 153s       PASS 30c 151s       PASS 24c 112s
+rich_3930           fail 92c 372s      fail 100c 262s       fail 95c 516s       fail 81c 672s       fail 95c 427s       fail 92c 266s
+rich_3938           fail 91c 402s       fail 60c 217s       fail 72c 711s       fail 98c 686s       fail 85c 714s       fail 64c 383s
+rich_3942          fail 101c 330s       fail 27c 133s       fail 34c 198s       fail 30c 188s       fail 31c 199s       fail 33c 169s
+rich_3953          fail 102c 606s      fail 101c 505s       fail 53c 290s       fail 40c 253s       fail 49c 241s       fail 35c 190s
+* = gold patch fails in our environment; outcome not counted

@@ -1,0 +1,6 @@
+# v8-alean-10m: per-task cap lowered 12 -> 10 min. Tasks run one after another and an overrun of the 12-hour total
+# fails the whole submission; with fewer overflow crashes, tasks run longer than v8-best's (which fit at 12 min).
+evaluation:
+  timeout_seconds: 300
+  max_tool_calls: 100
+  max_time_minutes: 10

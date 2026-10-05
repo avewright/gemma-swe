@@ -1,0 +1,7 @@
+# v8-best-2k-alean (E16): the analyzer's own context is never compacted, so keep it small: 1024 output tokens.
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 1024
+thinking_config:
+  include_thoughts: false

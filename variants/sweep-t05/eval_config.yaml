@@ -1,0 +1,5 @@
+# Only stops runaway tasks: tasks run one after another and an overrun of the 12-hour total fails the submission.
+evaluation:
+  timeout_seconds: 300
+  max_tool_calls: 100
+  max_time_minutes: 12

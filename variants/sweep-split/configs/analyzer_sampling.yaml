@@ -1,0 +1,7 @@
+# sweep-split: the read-only analyzer explores at T=1.0 (breaks search loops); the coder edits at T=0.2.
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 8192
+thinking_config:
+  include_thoughts: false

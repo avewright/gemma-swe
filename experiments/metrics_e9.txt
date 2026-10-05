@@ -1,0 +1,20 @@
+variant            runs  solved/graded  calls  b2b rep  any rep  reads  edits edit fail garbled empty sub 1st edit   secs tok/turn timeouts overflow
+v8-best              12           2/12     44      11%      21%     10      1       123    0.5%         0       24    316       92        3        4
+v8-best-2k           12           3/12     58       4%      22%     10      2        30    0.4%         1       29    428       86        2        0
+v8-best-2k-lean      12           1/12     50       3%      24%      9      2        44    3.4%         1       17    276       87        2        2
+v8-best-4k           12           1/12     48      17%      24%      9      6        84    5.8%         1       36    544      103        3        2
+
+task                      v8-best          v8-best-2k     v8-best-2k-lean          v8-best-4k
+rich_3052           fail 39c 567s       PASS 32c 646s       fail 58c 512s       fail 33c 244s
+rich_3063           fail 61c 718s      fail 100c 563s       fail 27c 713s       fail 93c 672s
+rich_3105           fail 43c 176s       fail 92c 289s       fail 76c 238s       fail 31c 120s
+rich_3472           fail 52c 691s       fail 39c 206s       fail 42c 470s       fail 80c 717s
+rich_3506           fail 37c 191s       fail 71c 662s       fail 57c 517s       fail 48c 338s
+rich_3676           PASS 30c 198s       PASS 70c 414s       fail 32c 228s       fail 21c 105s
+rich_3777           fail 16c 720s       fail 29c 720s       fail 40c 150s       fail 47c 443s
+rich_3905           PASS 30c 153s       PASS 26c 156s       PASS 18c 125s       PASS 21c 721s
+rich_3930           fail 46c 196s       fail 94c 443s       fail 92c 315s       fail 54c 678s
+rich_3938           fail 64c 435s       fail 96c 506s       fail 97c 524s       fail 55c 697s
+rich_3942           fail 51c 174s       fail 35c 106s       fail 76c 189s       fail 39c 176s
+rich_3953          fail 103c 551s       fail 47c 336s       fail 30c 179s       fail 96c 645s
+* = gold patch fails in our environment; outcome not counted

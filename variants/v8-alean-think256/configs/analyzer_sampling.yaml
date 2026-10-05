@@ -1,0 +1,8 @@
+# v8-alean-think256 (E17): lean analyzer with light thinking (budget 256), 1024 output tokens.
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 1024
+thinking_config:
+  include_thoughts: true
+  thinking_budget: 256

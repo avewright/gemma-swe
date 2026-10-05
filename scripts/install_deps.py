@@ -21,6 +21,8 @@ SKIP_GROUPS = {"docs", "docs-tests", "github-actions", "translations"}
 
 
 def pip_install(reqs: list[str]) -> None:
+    # Direct git/URL requirements (e.g. private docs "insiders" packages) can't install and can hang for minutes.
+    reqs = [r for r in reqs if "://" not in r and not r.startswith("git+")]
     if not reqs:
         return
     base = [sys.executable, "-m", "pip", "install", "-q", "--find-links=/wheels", "--prefer-binary"]
@@ -104,12 +106,9 @@ def main() -> None:
         print(f"install_deps: {len(reqs)} declared reqs")
     reqs = [r for r in dict.fromkeys(r.strip() for r in reqs) if r and req_name(r) != own]
     pip_install(reqs)
-    # Reinstall the repo itself in editable mode, with its deps: this applies the repo's own
-    # version bounds (setup.py-era requests needs urllib3; old fastapi needs an old starlette),
-    # since setup.py always picks the newest wheel.
-    editable = [sys.executable, "-m", "pip", "install", "-q", "--find-links=/wheels", "--no-build-isolation", "-e", str(repo)]
-    if subprocess.run(editable, capture_output=True).returncode != 0:
-        subprocess.run(editable[:4] + ["--no-deps"] + editable[4:], capture_output=True)
+    # Reinstall the repo itself in editable mode, since a locked dep may have replaced it.
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "--no-deps", "--no-build-isolation", "-e", str(repo)],
+                   capture_output=True)
 
 
 if __name__ == "__main__":

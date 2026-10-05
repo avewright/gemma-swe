@@ -1,0 +1,7 @@
+# sweep-split (E8): coder at T=0.2 (precise edits); the analyzer uses configs/analyzer_sampling.yaml at T=1.0.
+temperature: 0.2
+top_p: 0.95
+top_k: 64
+max_output_tokens: 8192
+thinking_config:
+  include_thoughts: false

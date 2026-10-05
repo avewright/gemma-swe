@@ -1,0 +1,8 @@
+# v8-best-think (E4): v8-best with thinking on. The bridge only sends enable_thinking, so thinking length is
+# bounded only by max_output_tokens (8192, same as v8-best).
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 8192
+thinking_config:
+  include_thoughts: true

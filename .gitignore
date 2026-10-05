@@ -1,6 +1,16 @@
+# Secrets
 .env
+**/.env
 
-# Contest data is large and local-only.
+# macOS / Python noise
+.DS_Store
+**/__pycache__/
+*.pyc
+**/.venv/
+**/vllm-venv/
+*.log
+
+# Contest data: large, local-only
 data/*.zip
 data/*.kaggle-partial
 data/snapshots/
@@ -9,17 +19,13 @@ data/embeddings/
 data/graphs/
 data/docker/
 data/sandbox/
-
-# Built submission archive.
-submission.zip
-
-# Teacher traces are derived from contest tasks.
 data/traces/
 
-# macOS / Python noise.
-.DS_Store
-**/__pycache__/
-**/.venv/
-
-# Nested repo with its own remote (avewright/private-gemma-2); 65 GB of runs.
-private-gemma-2/
+# Run output, teacher traces (derived from contest tasks), built archives, weights
+runs/
+traces/
+dist/
+submission.zip
+*.zip
+*.safetensors
+!starter/sample_submission/adapters/**/*.safetensors

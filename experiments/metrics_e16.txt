@@ -1,0 +1,18 @@
+variant            runs  solved/graded  calls  b2b rep  any rep  reads  edits edit fail garbled empty sub 1st edit   secs tok/turn timeouts overflow
+v8-best-2k-alean     24           5/24     62       5%      14%      5      2         3    7.5%         3       32    392       89        4        1
+v8-best-2k-solo      24           4/24     83      14%      28%     12      1         3   12.9%         2       32    371       89        4        0
+
+task             v8-best-2k-alean     v8-best-2k-solo
+rich_3052           fail 23c 169s       fail 32c 376s
+rich_3063          fail 102c 554s       PASS 60c 314s
+rich_3105           fail 68c 140s       fail 97c 388s
+rich_3472           fail 47c 121s       fail 84c 272s
+rich_3506           fail 36c 212s       fail 29c 186s
+rich_3676           PASS 38c 312s       PASS 35c 365s
+rich_3777           PASS 45c 322s      fail 119c 713s
+rich_3905           PASS 20c 220s        PASS 9c 116s
+rich_3930           fail 90c 718s       fail 68c 718s
+rich_3938           fail 75c 697s       fail 96c 674s
+rich_3942           fail 85c 589s       fail 56c 423s
+rich_3953           fail 42c 413s      fail 110c 635s
+* = gold patch fails in our environment; outcome not counted

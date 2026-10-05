@@ -1,0 +1,17 @@
+variant            runs  solved/graded  calls  b2b rep  any rep  reads  edits edit fail garbled empty sub 1st edit   secs tok/turn timeouts overflow
+v9-cand              24           4/24     42       4%      13%     10      2        62    2.0%         1       28    404      104        6        4
+
+task                      v9-cand
+rich_3052           fail 36c 304s
+rich_3063           fail 98c 651s
+rich_3105           fail 39c 128s
+rich_3472           fail 32c 298s
+rich_3506           fail 33c 702s
+rich_3676           fail 32c 182s
+rich_3777           fail 37c 255s
+rich_3905           PASS 15c 490s
+rich_3930           fail 53c 656s
+rich_3938           fail 87c 656s
+rich_3942           fail 40c 198s
+rich_3953          fail 100c 455s
+* = gold patch fails in our environment; outcome not counted

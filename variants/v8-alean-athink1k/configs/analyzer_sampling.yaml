@@ -1,0 +1,9 @@
+# v8-alean-athink1k (E17): the lean analyzer thinks (budget 1024) before its report; 2048 tokens leaves room for the
+# report after the thoughts. The coder keeps thinking off.
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 2048
+thinking_config:
+  include_thoughts: true
+  thinking_budget: 1024

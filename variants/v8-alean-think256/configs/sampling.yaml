@@ -1,0 +1,8 @@
+# v8-alean-think256 (E17): v8-best-2k-alean with light thinking in both agents (budget 256 per turn).
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 2048
+thinking_config:
+  include_thoughts: true
+  thinking_budget: 256

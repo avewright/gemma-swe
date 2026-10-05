@@ -17,20 +17,26 @@ import time
 from pathlib import Path
 
 import yaml
-from openai import BadRequestError, OpenAI
+import urllib.request
 
-ROOT = Path("/workspace/gemma")
-DATA = ROOT / "data"
+from openai import APIConnectionError, BadRequestError, InternalServerError, OpenAI
+
+ROOT = Path(os.environ.get("GEMMA_ROOT", "/workspace/gemma"))
+# GEMMA_DATA: the contest data, when it is not under the repo (e.g. on a laptop).
+DATA = Path(os.environ.get("GEMMA_DATA", ROOT / "data"))
 RUNS = ROOT / "runs"
-MODEL = "google/gemma-4-31b-it-qat-w4a16-ct"
+# SERVED_MODEL=main_lora benchmarks a LoRA adapter served with vllm --lora-modules main_lora=<dir>.
+MODEL = os.environ.get("SERVED_MODEL", "google/gemma-4-31b-it-qat-w4a16-ct")
 # What the contest sandbox image (data/docker/Dockerfile.sandbox) preinstalls.
 BASE_PACKAGES = ["pytest", "pytest-timeout==2.1.0", "typer", "pdm-backend", "setuptools", "wheel",
                  "poetry-core", "hatchling", "flit-core", "editables"]
 CONTEXT = 32768
 MAX_NUDGES = 3
 # Budgets and sampling come from the submission itself, like the contest harness.
-EVAL = yaml.safe_load((ROOT / "submission" / "eval_config.yaml").read_text())["evaluation"]
-SAMPLING = yaml.safe_load((ROOT / "submission" / "configs" / "sampling.yaml").read_text())
+# bench.py points SUBMISSION_DIR at a frozen copy, so edits to submission/ never leak into a running benchmark.
+SUBMISSION = Path(os.environ.get("SUBMISSION_DIR", ROOT / "submission"))
+EVAL = yaml.safe_load((SUBMISSION / "eval_config.yaml").read_text())["evaluation"]
+SAMPLING = yaml.safe_load((SUBMISSION / "configs" / "sampling.yaml").read_text())
 MAX_TOOLS = EVAL["max_tool_calls"]
 MAX_TURNS = EVAL["max_turns"]
 AGENT_MINUTES = EVAL["max_time_minutes"]
@@ -65,6 +71,12 @@ def task_message(task: dict, repo: Path) -> str:
                  "- Environment is offline (no network/PyPI access). All repository and test dependencies are ALREADY "
                  "pre-installed. Do NOT attempt to run pip install or download packages.\n"
                  "- The shell starts in the repository root. Paths described as /workspace are this directory.")
+    if CODE_INDEX is not None:
+        parts.append("## Code Intelligence Tools\n"
+                     "This repository has pre-built code graph and embedding data. Use these tools for fast, targeted navigation:\n"
+                     "- `search_similar_code(query)`: Find semantically similar functions/classes by keyword.\n"
+                     "- `get_code_neighbors(node)`: Find callers, callees, and definitions related to a symbol.\n"
+                     "- `get_code_subgraph(nodes)`: Get the induced subgraph for a set of symbols.")
     parts.append(f"## Workspace Layout\n{layout}")
     return "\n\n".join(parts)
 
@@ -199,7 +211,115 @@ def run_cmd(repo: Path, command: str) -> str:
     return json.dumps(payload)
 
 
+# Code-intelligence tools (HARNESS_README section 6, tools 7-9). The harness offers them when the
+# task's graph and embedding files exist (>100 bytes). CODE_TOOLS=1 turns them on here; off by
+# default so older benchmark runs stay comparable.
+CODE_TOOLS_ON = os.environ.get("CODE_TOOLS") == "1"
+CODE_TOOLS = [
+    {"type": "function", "function": {
+        "name": "get_code_neighbors",
+        "description": "Find incoming and outgoing neighbors (callers, callees, imports) of a symbol in the repository call/dependency graph.",
+        "parameters": {"type": "object", "properties": {
+            "node": {"type": "string"},
+            "edge_type": {"type": "string"},
+            "max_neighbors": {"type": "integer"}},
+            "required": ["node"]}}},
+    {"type": "function", "function": {
+        "name": "search_similar_code",
+        "description": "Find the graph nodes whose embeddings are most similar to the named symbol. Pass a class, function or module symbol name, not a sentence.",
+        "parameters": {"type": "object", "properties": {
+            "query": {"type": "string"},
+            "k": {"type": "integer"}},
+            "required": ["query"]}}},
+    {"type": "function", "function": {
+        "name": "get_code_subgraph",
+        "description": "Extract the induced subgraph (nodes and interconnecting edges) for a list of symbols.",
+        "parameters": {"type": "object", "properties": {
+            "nodes": {"type": "array", "items": {"type": "string"}}},
+            "required": ["nodes"]}}},
+]
+CODE_INDEX: dict | None = None
+
+
+def load_code_index(instance_id: str) -> dict | None:
+    graph, emb = DATA / "graphs" / f"{instance_id}.json", DATA / "embeddings" / f"{instance_id}.npz"
+    if not (graph.exists() and emb.exists() and graph.stat().st_size > 100 and emb.stat().st_size > 100):
+        return None
+    import numpy as np
+    g = json.loads(graph.read_text())
+    z = np.load(emb)
+    keys = list(z.keys())
+    mat = np.stack([z[k] for k in keys]).astype("float32")
+    mat /= np.linalg.norm(mat, axis=1, keepdims=True) + 1e-9
+    return {"text": {n["id"]: n.get("text", "") for n in g["nodes"]}, "edges": g["edges"],
+            "keys": keys, "mat": mat}
+
+
+def resolve_node(name: str, candidates) -> str | None:
+    """Harness resolve_node_name: exact, then . or / suffix, then case-insensitive, then substring."""
+    cands = list(candidates)
+    if name in cands:
+        return name
+    for tier in (lambda c: c.endswith("." + name) or c.endswith("/" + name),
+                 lambda c: c.lower() == name.lower(),
+                 lambda c: name.lower() in c.lower()):
+        hits = sorted((c for c in cands if tier(c)), key=len)
+        if hits:
+            return hits[0]
+    return None
+
+
+def code_tool(name: str, args: dict) -> str:
+    idx = CODE_INDEX
+    if idx is None:
+        return json.dumps({"status": "error", "error_message": "no code graph for this repository"})
+    if name == "get_code_neighbors":
+        node = resolve_node(str(args["node"]), idx["text"])
+        if node is None:
+            return json.dumps({"status": "error", "error_message": f"node not found: {args['node']}"})
+        etype = (args.get("edge_type") or "").lower()
+        out = []
+        for e in idx["edges"]:
+            if etype and e.get("type", "").lower() != etype:
+                continue
+            if e["source"] == node:
+                out.append(f"-> {e['target']} ({e.get('type')})")
+            elif e["target"] == node:
+                out.append(f"<- {e['source']} ({e.get('type')})")
+        out = list(dict.fromkeys(out))[: int(args.get("max_neighbors") or 50)]
+        return json.dumps({"status": "ok", "node": node, "neighbors": out, "count": len(out)})
+    if name == "search_similar_code":
+        node = resolve_node(str(args["query"]), idx["keys"])
+        if node is None:
+            return json.dumps({"status": "error", "error_message": f"no symbol matches {args['query']!r}; pass a symbol name"})
+        i = idx["keys"].index(node)
+        sims = idx["mat"] @ idx["mat"][i]
+        k = int(args.get("k") or 10)
+        results = []
+        for j in sims.argsort()[::-1]:
+            if j == i:
+                continue
+            key = idx["keys"][j]
+            results.append({"node_name": key, "code": clip(idx["text"].get(key, ""), 600), "similarity": round(float(sims[j]), 4)})
+            if len(results) >= k:
+                break
+        return json.dumps({"status": "ok", "query": node, "results": results, "count": len(results)})
+    if name == "get_code_subgraph":
+        wanted = {resolve_node(str(n), idx["text"]) for n in args["nodes"] or []} - {None}
+        edges = [{"from": e["source"], "to": e["target"], "type": e.get("type")}
+                 for e in idx["edges"] if e["source"] in wanted and e["target"] in wanted]
+        return json.dumps({"status": "ok", "nodes": sorted(wanted), "edges": edges,
+                           "node_count": len(wanted), "edge_count": len(edges)})
+    return json.dumps({"status": "error", "error_message": f"unknown tool {name}"})
+
+
+def active_tools() -> list[dict]:
+    return TOOLS + (CODE_TOOLS if CODE_INDEX is not None else [])
+
+
 def tool_call(repo: Path, name: str, args: dict, used: int) -> tuple[str, bool]:
+    if name in {t["function"]["name"] for t in CODE_TOOLS}:
+        return code_tool(name, args), False
     if name == "get_status":
         return json.dumps({"tool_calls_used": used, "tool_calls_remaining": MAX_TOOLS - used, "max_tool_calls": MAX_TOOLS}), False
     if name == "submit_patch":
@@ -278,7 +398,21 @@ def replace_once(text: str, old: str, new: str) -> tuple[str | None, str]:
     return None, "old_string matched 0 times; re-read the file and copy the lines exactly"
 
 
+def missing_args(name: str, args: dict) -> list[str]:
+    for tool in TOOLS + CODE_TOOLS:
+        if tool["function"]["name"] == name:
+            return [k for k in tool["function"]["parameters"].get("required", []) if k not in args]
+    return []
+
+
 def safe_tool_call(repo: Path, name: str, args: dict, used: int) -> tuple[str, bool]:
+    # Google ADK's FunctionTool rejects calls with missing mandatory parameters before the
+    # tool runs (so the harness's budget gate never sees them). Mirror its message.
+    missing = missing_args(name, args)
+    if missing:
+        return json.dumps({"error": f"Invoking `{name}()` failed as the following mandatory input parameters "
+                                    f"are not present:\n" + "\n".join(missing) + "\nYou could retry calling this "
+                                    "tool, but it is IMPORTANT for you to provide all the mandatory parameters."}), False
     try:
         return tool_call(repo, name, args, used)
     except Exception as exc:
@@ -290,11 +424,15 @@ def current_patch(repo: Path) -> str:
     return subprocess.run(["git", "diff", "HEAD"], cwd=repo, text=True, capture_output=True).stdout
 
 
-def prepare(task: dict) -> Path:
-    repo = RUNS / task["instance_id"] / "repo"
-    if repo.exists():
+def prepare(task: dict, repo: Path | None = None) -> Path:
+    """Build the task repo and its venv (repo.parent / "venv"). distill/ passes repo=/workspace."""
+    repo = repo or RUNS / task["instance_id"] / "repo"
+    if repo.is_mount():
+        for child in repo.iterdir():
+            shutil.rmtree(child) if child.is_dir() and not child.is_symlink() else child.unlink()
+    elif repo.exists():
         shutil.rmtree(repo)
-    repo.mkdir(parents=True)
+    repo.mkdir(parents=True, exist_ok=True)
     with tarfile.open(DATA / "snapshots" / f"{task['instance_id']}.tgz", "r:gz") as tar:
         tar.extractall(repo, filter="data")
     subprocess.run(["git", "config", "user.email", "agent@eval"], cwd=repo, check=True)
@@ -361,8 +499,22 @@ def grade(task: dict, repo: Path) -> int:
     return proc.returncode
 
 
+def wait_for_server(base_url: str, timeout: float = 900) -> float | None:
+    """Block until vLLM answers /models. Returns seconds waited, or None on timeout."""
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            with urllib.request.urlopen(f"{base_url}/models", timeout=5) as resp:
+                if resp.status == 200:
+                    return time.time() - start
+        except OSError:
+            pass
+        time.sleep(10)
+    return None
+
+
 def main() -> None:
-    global RUNS
+    global RUNS, CODE_INDEX
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", default="rich_4077")
     parser.add_argument("--base-url", default="http://127.0.0.1:8000/v1")
@@ -372,6 +524,8 @@ def main() -> None:
     args = parser.parse_args()
     RUNS = args.runs_dir
     task = load_task(args.task)
+    if CODE_TOOLS_ON:
+        CODE_INDEX = load_code_index(args.task)
     start = time.time()
     repo = prepare(task)
     setup_seconds = time.time() - start
@@ -383,7 +537,7 @@ def main() -> None:
         (repo.parent / "result.json").write_text(json.dumps(result, indent=1))
         print("RESOLVED" if code == 0 else "FAILED", args.task)
         raise SystemExit(code)
-    system = (ROOT / "submission" / "prompts" / "system.md").read_text()
+    system = (SUBMISSION / "prompts" / "system.md").read_text()
     client = OpenAI(base_url=args.base_url, api_key="EMPTY")
     messages = [
         {"role": "system", "content": system},
@@ -415,16 +569,27 @@ def main() -> None:
             break
         last_len = len(messages)
         try:
-            resp = client.chat.completions.create(
-                model=MODEL,
-                messages=messages,
-                tools=TOOLS,
-                tool_choice="auto",
-                max_tokens=min(MAX_OUTPUT, room),
-                temperature=SAMPLING.get("temperature", 0.2),
-                top_p=SAMPLING.get("top_p", 1.0),
-                extra_body={"chat_template_kwargs": {"enable_thinking": ENABLE_THINKING}},
-            )
+            resp = None
+            while resp is None:
+                try:
+                    resp = client.chat.completions.create(
+                        model=MODEL,
+                        messages=messages,
+                        tools=active_tools(),
+                        tool_choice="auto",
+                        max_tokens=min(MAX_OUTPUT, room),
+                        temperature=SAMPLING.get("temperature", 0.2),
+                        top_p=SAMPLING.get("top_p", 1.0),
+                        extra_body={"chat_template_kwargs": {"enable_thinking": ENABLE_THINKING}},
+                    )
+                except (APIConnectionError, InternalServerError) as exc:
+                    # Our vLLM died, not the agent's fault: wait for it and retry this turn,
+                    # without charging the wait to the agent's time budget.
+                    print(f"turn {turn}: server error ({type(exc).__name__}), waiting for vLLM")
+                    waited = wait_for_server(args.base_url)
+                    if waited is None:
+                        raise SystemExit("server_down")
+                    setup_seconds += waited
         except BadRequestError as exc:
             print(f"turn {turn}: request rejected: {exc}")
             stop = "request_rejected"
@@ -456,7 +621,7 @@ def main() -> None:
                 payload = {}
             print(f"turn {turn}: {name}")
             result, done = safe_tool_call(repo, name, payload, used)
-            if name not in {"get_status", "submit_patch"}:
+            if name not in {"get_status", "submit_patch"} and not missing_args(name, payload):
                 used += 1
             messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
             if done:

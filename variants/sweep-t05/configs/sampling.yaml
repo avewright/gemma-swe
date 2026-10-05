@@ -1,0 +1,7 @@
+# sweep-t05 (E8 temperature sweep): v8-best with only sampling changed.
+temperature: 0.5
+top_p: 0.95
+top_k: 64
+max_output_tokens: 8192
+thinking_config:
+  include_thoughts: false

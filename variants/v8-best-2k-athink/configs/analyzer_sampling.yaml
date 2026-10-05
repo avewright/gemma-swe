@@ -1,0 +1,8 @@
+# v8-best-2k-athink: the analyzer (called once, own context) thinks before its LOCATION / ROOT CAUSE / FIX PLAN
+# report; 8192 output tokens so its thinking isn't cut off. The coder keeps thinking off and 2048 tokens.
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 8192
+thinking_config:
+  include_thoughts: true

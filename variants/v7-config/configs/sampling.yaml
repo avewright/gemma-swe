@@ -1,0 +1,10 @@
+temperature: 0.2
+top_p: 0.95
+# v7: 8192 like the 0.12 public notebook. vLLM reserves max_output_tokens out of the 32,768-token
+# window, so 16384 leaves only ~16k for the conversation before requests fail.
+max_output_tokens: 8192
+# v7: thinking off. adk_submission's bridge (resolvers/generation.py) only sends enable_thinking to
+# vLLM: include_thoughts false turns thinking off, thinking_budget is never sent as a limit, and
+# thinking_level only adds reasoning_effort. The 0.12 and 0.08 public notebooks both run this way.
+thinking_config:
+  include_thoughts: false

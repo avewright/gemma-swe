@@ -1,0 +1,10 @@
+# v8-best-edit (E6): v8-best with one prompt change (no blind edit retries, no repeated calls). Sampling unchanged.
+# v8-best: the 0.12 public notebook's bundle with Gemma's recommended sampling. At temperature 0.2, pod traces
+# showed 53-82% of tool calls repeating the previous call exactly; at 1.0 the repeats disappeared.
+# Thinking stays off (include_thoughts: false), as in the 0.12 notebook.
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 8192
+thinking_config:
+  include_thoughts: false

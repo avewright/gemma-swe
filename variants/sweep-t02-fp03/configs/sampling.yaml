@@ -1,0 +1,8 @@
+# sweep-t02-fp03 (E8 temperature sweep): v8-best with only sampling changed.
+temperature: 0.2
+top_p: 0.95
+top_k: 64
+frequency_penalty: 0.3
+max_output_tokens: 8192
+thinking_config:
+  include_thoughts: false

@@ -71,6 +71,7 @@ def run_task(task: dict, args, out: Path, scratch: Path) -> dict:
         proc = subprocess.Popen(
             [PYTHON, str(SCRIPT), "--task", iid, "--base-url", args.base_url, "--runs-dir", str(scratch), "--mode", args.mode],
             cwd=ROOT,
+            env=dict(os.environ, SUBMISSION_DIR=str(out / "submission")),
             stdout=log,
             stderr=subprocess.STDOUT,
             start_new_session=True,
@@ -146,6 +147,8 @@ def main() -> None:
     parser.add_argument("--base-url", default="http://127.0.0.1:8000/v1")
     parser.add_argument("--mode", choices=["agent", "gold", "empty"], default="agent",
                         help="gold/empty check the benchmark itself: expect ~100%% and ~0%%")
+    parser.add_argument("--submission", type=Path, default=ROOT / "submission",
+                        help="submission dir to benchmark (copied into the run dir at start)")
     parser.add_argument("--keep", action="store_true", help="keep repos and venvs in /root/bench")
     args = parser.parse_args()
 
@@ -155,11 +158,15 @@ def main() -> None:
     (out / "results.jsonl").touch()
     scratch = SCRATCH / args.name
     scratch.mkdir(parents=True, exist_ok=True)
-    # Keep a copy of the prompt and config this run used.
-    shutil.copytree(ROOT / "submission", out / "submission", dirs_exist_ok=True)
+    # Freeze the prompt and config for this run; every task reads this copy.
+    # A resumed run keeps its original copy.
+    if not (out / "submission").exists():
+        shutil.copytree(args.submission, out / "submission")
 
     tasks = load_tasks(args)
-    done = {json.loads(l)["instance_id"] for l in (out / "results.jsonl").read_text().splitlines()}
+    # Crashed tasks (e.g. vLLM died) are infrastructure failures: rerun them on resume.
+    done = {r["instance_id"] for r in map(json.loads, (out / "results.jsonl").read_text().splitlines())
+            if not r["stop"].startswith("crash")}
     todo = [t for t in tasks if t["instance_id"] not in done]
     print(f"{len(tasks)} tasks, {len(done & {t['instance_id'] for t in tasks})} already done, "
           f"{len(todo)} to run, concurrency {args.concurrency}", flush=True)

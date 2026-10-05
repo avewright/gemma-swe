@@ -1,0 +1,8 @@
+{
+  "note": "Contest tasks (data/tasks.jsonl) that also appear in public datasets, matched on PR number and base_commit. Checked 2026-09-28.",
+  "dev40_exclude": ["rich_3052", "rich_3063", "rich_3105", "rich_3469", "rich_3472", "rich_3486", "rich_3506", "requests_6644"],
+  "open_swe_traces_resolved": ["rich_2943", "rich_3006", "rich_3067", "rich_3105", "rich_3130", "rich_3180", "rich_3296", "rich_3518", "rich_3718"],
+  "swe_rebench_v2": ["rich_2943", "rich_3006", "rich_3067", "rich_3105", "rich_3130", "rich_3180", "rich_3296", "rich_3518", "rich_3718"],
+  "swe_rebench_v2_prs": ["rich_3043", "rich_3052", "rich_3061", "rich_3063", "rich_3064", "rich_3130", "rich_3278", "rich_3454", "rich_3468", "rich_3469", "rich_3470", "rich_3471", "rich_3472", "rich_3486", "rich_3506", "rich_3521", "rich_3535", "rich_3675"],
+  "swe_bench_live": ["requests_6644"]
+}

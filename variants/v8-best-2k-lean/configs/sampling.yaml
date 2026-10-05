@@ -1,0 +1,10 @@
+# v8-best-2k-lean (E9): v8-best-2k plus prompt rules that keep tool output short (slower context growth).
+# v8-best: the 0.12 public notebook's bundle with Gemma's recommended sampling. At temperature 0.2, pod traces
+# showed 53-82% of tool calls repeating the previous call exactly; at 1.0 the repeats disappeared.
+# Thinking stays off (include_thoughts: false), as in the 0.12 notebook.
+temperature: 1.0
+top_p: 0.95
+top_k: 64
+max_output_tokens: 2048
+thinking_config:
+  include_thoughts: false
