@@ -12,3 +12,14 @@ data/sandbox/
 
 # Built submission archive.
 submission.zip
+
+# Teacher traces are derived from contest tasks.
+data/traces/
+
+# macOS / Python noise.
+.DS_Store
+**/__pycache__/
+**/.venv/
+
+# Nested repo with its own remote (avewright/private-gemma-2); 65 GB of runs.
+private-gemma-2/
