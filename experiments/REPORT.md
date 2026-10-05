@@ -759,3 +759,13 @@ SequentialAgent explore (read-only, output_key repair_plan) -> coder, thinking o
 because include_thoughts:false disables thinking), limits 5 min / 60 calls / 60 s / 100 turns.
 One change: eval_config.yaml removed (scorer defaults 100 calls / 60 min / 300 s). Hypothesis: tight limits cost tasks.
 Harness note: submit_patch + a final text message ends the run, so any review stage must run before submit_patch.
+
+## 2026-10-05: prepared v10-mech (not yet submitted)
+Base: top-bundle (0.12 anchor), same agent tree, sampling and scorer-default limits; only the two prompts change.
+Coder: grep exact issue names first and call the analyzer only if 2-3 searches find no clear location; first edit by
+call 10; identical repeat calls forbidden; no bare pytest; edit only with edit_file (it returns the diff, so no re-read);
+no git checkout/reset/stash/clean; no narration except a NOTES line every ~5 calls (compaction drops old tool output);
+one closing line after submit_patch. Analyzer: grep first, graph tools only with exact symbol names, no repeats, ~12 calls.
+Harness checks (wheelhouse 0.2.12 / swegemma 0.2.7): the scorer passes no callback registry to compile_submission, so
+any callback fails compilation; enable_sandbox_testing defaults True (pytest allowed). Compiles with the real compiler.
+Untested on the pod (no pod running). Zip sha256 642476003929a869...
