@@ -768,4 +768,4 @@ no git checkout/reset/stash/clean; no narration except a NOTES line every ~5 cal
 one closing line after submit_patch. Analyzer: grep first, graph tools only with exact symbol names, no repeats, ~12 calls.
 Harness checks (wheelhouse 0.2.12 / swegemma 0.2.7): the scorer passes no callback registry to compile_submission, so
 any callback fails compilation; enable_sandbox_testing defaults True (pytest allowed). Compiles with the real compiler.
-Untested on the pod (no pod running). Zip sha256 642476003929a869...
+Untested on the pod (no pod running). NOTES must share a message with a tool call: a text-only turn triggers a harness nudge (3 in a row end the session).
