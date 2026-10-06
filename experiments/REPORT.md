@@ -773,3 +773,8 @@ Untested on the pod (no pod running). NOTES must share a message with a tool cal
 ## LB 2026-10-05: seq-default = 0.13
 Public 0.13 bundle (explore -> coder) with eval_config removed scored 0.13: same as the original bundle's public score, +0.01
 over our top-bundle anchor (0.12). Within noise (about ±0.03): removing the 5-min/60-call limits did not measurably help or hurt.
+
+## LB 2026-10-06: v10-mech = 0.10
+Top-bundle + harness-fitted prompts scored 0.10 against the anchor's 0.12 (and seq-default's 0.13). Within noise (about ±0.03), but
+not better, and it took more than 12 h of wall time to score (pending at 12:58 UTC). Prompt-only changes on the anchor have now
+scored 0.10 (tb-think1024, prompt plus thinking) and 0.10 (v10-mech); none beat it. Stop spending slots on prompt rules.
