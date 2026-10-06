@@ -778,3 +778,13 @@ over our top-bundle anchor (0.12). Within noise (about ±0.03): removing the 5-m
 Top-bundle + harness-fitted prompts scored 0.10 against the anchor's 0.12 (and seq-default's 0.13). Within noise (about ±0.03), but
 not better, and it took more than 12 h of wall time to score (pending at 12:58 UTC). Changes on the anchor have now
 scored 0.10 (tb-think1024: thinking + 5-min cap) and 0.10 (v10-mech: prompt rules); none beat it. Stop spending slots on prompt rules.
+
+## F4. Forum 746250 (Ayush Thakur, 2026-10-06): 129-task local sweeps on 32 GPUs
+Single runs, resolved/129 (local public tasks; absolute numbers far above LB). Reference E9: T=0.2, top_p 0.95, thinking 4,096,
+thought summaries on, 60 min / 50 calls / 80 turns = 48 (37%). Thinking disabled = 23 (17.8%); summaries disabled = 35 (27%).
+T 0.0/0.4/1.0 = 47/51/51; budget 2,048/6,144 = 50/48. Active cap 6/10/15/20/60 min = 37/46/54/49/51 (61/26/3/4/0 timeouts).
+Graph tools: no benefit (all semantic searches empty). Analyzer: 50 -> 51 (noise). 25 vs 50 calls: -14 tasks.
+Repeat of the same config: 55 then 48 (noise ~±5 tasks of 129). Their Kaggle run is pending.
+Conflicts with ours: E4 (old wheels, dropped thoughts) and tb-think1024 (LB 0.10, 5-min cap; K3 had 3/8 cap timeouts).
+Their 6-min cap alone cost 14 tasks, so our 5-min cap likely confounded the thinking test. Thinking is ~2x slower per
+step on L4, so the 12-h total is the binding constraint.
