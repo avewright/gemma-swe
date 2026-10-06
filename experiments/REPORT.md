@@ -760,7 +760,7 @@ because include_thoughts:false disables thinking), limits 5 min / 60 calls / 60 
 One change: eval_config.yaml removed (scorer defaults 100 calls / 60 min / 300 s). Hypothesis: tight limits cost tasks.
 Harness note: submit_patch + a final text message ends the run, so any review stage must run before submit_patch.
 
-## 2026-10-05: prepared v10-mech (not yet submitted)
+## 2026-10-06: submitted v10-mech (ref 56864932, 00:09 UTC)
 Base: top-bundle (0.12 anchor), same agent tree, sampling and scorer-default limits; only the two prompts change.
 Coder: grep exact issue names first and call the analyzer only if 2-3 searches find no clear location; first edit by
 call 10; identical repeat calls forbidden; no bare pytest; edit only with edit_file (it returns the diff, so no re-read);
