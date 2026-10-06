@@ -769,3 +769,7 @@ one closing line after submit_patch. Analyzer: grep first, graph tools only with
 Harness checks (wheelhouse 0.2.12 / swegemma 0.2.7): the scorer passes no callback registry to compile_submission, so
 any callback fails compilation; enable_sandbox_testing defaults True (pytest allowed). Compiles with the real compiler.
 Untested on the pod (no pod running). NOTES must share a message with a tool call: a text-only turn triggers a harness nudge (3 in a row end the session).
+
+## LB 2026-10-05: seq-default = 0.13
+Public 0.13 bundle (explore -> coder) with eval_config removed scored 0.13: same as the original bundle's public score, +0.01
+over our top-bundle anchor (0.12). Within noise (about ±0.03): removing the 5-min/60-call limits did not measurably help or hurt.
