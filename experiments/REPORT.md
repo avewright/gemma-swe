@@ -788,3 +788,10 @@ Repeat of the same config: 55 then 48 (noise ~±5 tasks of 129). Their Kaggle ru
 Conflicts with ours: E4 (old wheels, dropped thoughts) and tb-think1024 (LB 0.10, 5-min cap; K3 had 3/8 cap timeouts).
 Their 6-min cap alone cost 14 tasks, so our 5-min cap likely confounded the thinking test. Thinking is ~2x slower per
 step on L4, so the 12-h total is the binding constraint.
+
+## Public evidence 2026-10-06: budget-fit single agent = 0.18 (verracodeguacas notebook, as shown on Kaggle)
+Saved unchanged as variants/think-budgetfit. Single agent, official starter prompt + "edit by call 12" + graph tools
+discouraged; thinking ON (include_thoughts true, budget 4,096), T=0.2, 8,192 output; eval_config 8 min / 28 calls /
+timeout 240 s / 80 turns. Scored 0.18 public against 0.12-0.13 for the thinking-off bundles: first public evidence that
+thinking plus a call cap that fits 12 h beats the thinking-off family. Note: timeout_seconds also sets the grading pytest
+timeout (swegemma verification.py:502), so short values (60-120 s) can fail correct patches.
