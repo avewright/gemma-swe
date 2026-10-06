@@ -776,5 +776,5 @@ over our top-bundle anchor (0.12). Within noise (about ±0.03): removing the 5-m
 
 ## LB 2026-10-06: v10-mech = 0.10
 Top-bundle + harness-fitted prompts scored 0.10 against the anchor's 0.12 (and seq-default's 0.13). Within noise (about ±0.03), but
-not better, and it took more than 12 h of wall time to score (pending at 12:58 UTC). Prompt-only changes on the anchor have now
-scored 0.10 (tb-think1024, prompt plus thinking) and 0.10 (v10-mech); none beat it. Stop spending slots on prompt rules.
+not better, and it took more than 12 h of wall time to score (pending at 12:58 UTC). Changes on the anchor have now
+scored 0.10 (tb-think1024: thinking + 5-min cap) and 0.10 (v10-mech: prompt rules); none beat it. Stop spending slots on prompt rules.
