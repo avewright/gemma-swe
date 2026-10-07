@@ -790,6 +790,7 @@ Their 6-min cap alone cost 14 tasks, so our 5-min cap likely confounded the thin
 step on L4, so the 12-h total is the binding constraint.
 
 ## Public evidence 2026-10-06: budget-fit single agent = 0.18 (verracodeguacas notebook, as shown on Kaggle)
+Submitted unchanged on 2026-10-07 12:44 UTC as a replication (our first thinking-on LB run).
 Saved unchanged as variants/think-budgetfit. Single agent, official starter prompt + "edit by call 12" + graph tools
 discouraged; thinking ON (include_thoughts true, budget 4,096), T=0.2, 8,192 output; eval_config 8 min / 28 calls /
 timeout 240 s / 80 turns. Scored 0.18 public against 0.12-0.13 for the thinking-off bundles: first public evidence that
